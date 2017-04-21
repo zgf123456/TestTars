@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<servants>
+    <servant name="HelloObj">
+        <home-api>com.zgf.tars.server.tars.HelloServant</home-api>
+        <home-class>com.zgf.tars.server.tars.impl.HelloServantImpl</home-class>
+    </servant>
+</servants>

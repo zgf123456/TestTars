@@ -10,6 +10,36 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>tars-server</artifactId>
+    <packaging>war</packaging>
 
+    <dependencies>
+        <dependency>
+            <groupId>qq-cloud-central</groupId>
+            <artifactId>tars-server</artifactId>
+            <version>1.0.1</version>
+            <type>jar</type>
+        </dependency>
+    </dependencies>
 
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>qq-cloud-central</groupId>
+                <artifactId>tars-maven-plugin</artifactId>
+                <version>1.0.1</version>
+                <configuration>
+                    <tars2JavaConfig>
+                        <tarsFiles>
+                            <tarsFile>${basedir}/src/main/resources/hello.tars</tarsFile>
+                        </tarsFiles>
+                        <tarsFileCharset>UTF-8</tarsFileCharset>
+                        <servant>true</servant>
+                        <srcPath>${basedir}/src/main/java</srcPath>
+                        <charset>UTF-8</charset>
+                        <packagePrefixName>com.zgf.tars.server.</packagePrefixName>
+                    </tars2JavaConfig>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>

@@ -7,6 +7,8 @@ import com.zgf.tars.client.testapp.HelloPrx;
 import com.zgf.tars.client.testapp.HelloPrxCallback;
 import org.junit.Test;
 
+import java.util.UUID;
+
 /**
  * Created by zgf on 17/4/21.
  */
@@ -50,13 +52,44 @@ public class TestClient {
         }, 1000, "HelloWorld");
     }
 
-    public static void main(String[] args) {
-        CommunicatorConfig cfg = new CommunicatorConfig();
+    public static void main(String[] args) throws Exception {
+        // 依赖 JDK版本 1.8
+
+        // 客户端寻址模式
+        // 1. 直接寻址
+        //      TestApp.HelloServer.HelloObj@tcp -h 10.211.55.9 -p 20002 -t 60000
+        //      多节点模式 TestApp.HelloServer.HelloObj@tcp -h 10.211.55.9 -p 20002 -t 60000:tcp -h 10.211.55.9 -p 20002 -t 60000
+
+//        CommunicatorConfig cfg = new CommunicatorConfig();
+//        Communicator communicator = CommunicatorFactory.getInstance().getCommunicator(cfg);
+//        final HelloPrx proxy = communicator.stringToProxy(HelloPrx.class, "TestApp.HelloServer.HelloObj@tcp -h 10.211.55.9 -p 20002 -t 60000");
+
+        // 2. 注册中心寻址
+        CommunicatorConfig cfg = CommunicatorConfig.load(TestClient.class.getClassLoader().getResource("tarsConfig.conf").getFile());
         Communicator communicator = CommunicatorFactory.getInstance().getCommunicator(cfg);
-        HelloPrx proxy = communicator.stringToProxy(HelloPrx.class, "testapp.HelloServer.HelloObj@tcp -h 127.0.0.1 -p 18600 -t 60000");
+        final HelloPrx proxy = communicator.stringToProxy(HelloPrx.class, "TestApp.HelloServer.HelloObj");
+
+
+        // 服务调用模式
+        // 1. 单向调用
+        // 2. 同步调用
+        // 3. 异步调用
+        // 4. Set调用 -- 服务编排??
+
         //同步调用
-        String ret = proxy.hello(1000, "Hello World");
-        System.out.println(ret);
+        Runnable runnable = new Runnable() {
+            public void run() {
+                for (int i = 0; i < 10; i++) {
+                    String ret = proxy.hello((int) Thread.currentThread().getId(), "Hello World(" + Thread.currentThread().getName() + "-" + UUID.randomUUID().toString() + ")");
+                    System.out.println(ret);
+                }
+            }
+        };
+
+        for (int i = 0; i < 10; i++) {
+            Thread thread = new Thread(runnable);
+            thread.start();
+        }
 
 //        //单向调用
 //        proxy.async_hello(null, 1000, "Hello World");

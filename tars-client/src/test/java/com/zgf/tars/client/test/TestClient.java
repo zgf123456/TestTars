@@ -67,8 +67,15 @@ public class TestClient {
         // 2. 注册中心寻址
         CommunicatorConfig cfg = CommunicatorConfig.load(TestClient.class.getClassLoader().getResource("tarsConfig.conf").getFile());
         Communicator communicator = CommunicatorFactory.getInstance().getCommunicator(cfg);
+
         final HelloPrx proxy = communicator.stringToProxy(HelloPrx.class, "TestApp.HelloServer.HelloObj");
 
+
+        // 测试负载、轮询
+//        ServantProxyConfig servantProxyConfig = new ServantProxyConfig();
+//        servantProxyConfig.set
+//        LoadBalance loadBalance = new DefaultLoadBalance(servantProxyConfig);
+//        HelloPrx proxy1 = communicator.stringToProxy(HelloPrx.class, servantProxyConfig, loadBalance);
 
         // 服务调用模式
         // 1. 单向调用
@@ -79,14 +86,24 @@ public class TestClient {
         //同步调用
         Runnable runnable = new Runnable() {
             public void run() {
-                for (int i = 0; i < 10; i++) {
-                    String ret = proxy.hello((int) Thread.currentThread().getId(), "Hello World(" + Thread.currentThread().getName() + "-" + UUID.randomUUID().toString() + ")");
-                    System.out.println(ret);
+                for (int i = 0; i < 100000; i++) {
+                    try {
+                        String ret = proxy.hello((int) Thread.currentThread().getId(), "Hello World(" + Thread.currentThread().getName() + "-" + UUID.randomUUID().toString() + ")");
+                        System.out.println(ret);
+                    } catch (Throwable e) {
+                        e.printStackTrace();
+                    }
+
+                    try {
+                        Thread.sleep(1000);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         };
 
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 1; i++) {
             Thread thread = new Thread(runnable);
             thread.start();
         }
